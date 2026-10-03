@@ -4,8 +4,8 @@
   "description": "Claude Code mods: bands, panes and status lines built in the AI playground",
   "plugins": [
     {
-      "name": "cost-meter",
-      "source": "./cost-meter",
+      "name": "cost-git",
+      "source": "./cost-git",
       "description": "A band above the prompt: session and last-message cost, plus git branch, status, CI, pull and push"
     }
   ]

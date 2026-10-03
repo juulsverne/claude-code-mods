@@ -1,4 +1,4 @@
-# Cost meter band
+# cost-git
 
 A Claude Code mod: a band above the prompt. The left side shows what the session costs. The right side shows git and CI for the repo you're in.
 
@@ -35,20 +35,20 @@ Install it from the marketplace this repo provides:
 
 ```
 /plugin marketplace add juulsverne/claude-code-mods
-/plugin install cost-meter@playground-mods
+/plugin install cost-git@playground-mods
 ```
 
 Or try it in one session from a clone:
 
 ```bash
-claude --plugin-dir cost-meter
+claude --plugin-dir cost-git
 ```
 
 ## Checks
 
-- `claude plugin validate claude-code-mods/cost-meter`: passes with no warnings.
+- `claude plugin validate claude-code-mods/cost-git`: passes with no warnings.
 - `tsc` against Claude Code 2.1.286's plugin types: the hooks module is clean; the test file has fixture typing errors (the `BAND` props), which don't affect running the tests.
-- `claude plugin test claude-code-mods/cost-meter`: 10 tests pass on the terminal and desktop surfaces. They cover:
+- `claude plugin test claude-code-mods/cost-git`: 10 tests pass on the terminal and desktop surfaces. They cover:
   - a fresh session reading `Session $0.00 · Last message $0.00` with no emoji
   - the session figure counting up after turns, and last message tracking the latest turn
   - the git side's repo, branch picker, changes, ahead/behind and CI

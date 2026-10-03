@@ -21,7 +21,7 @@ async function rowText(ui: any) {
 test('a fresh session reads "Session $0.00 · Last message $0.00", no emoji', async ($, on) => {
   mock.clock(on, { now: 60_000 })
   for (const surface of SURFACES) {
-    const ui = await $.ui.mount({ plugin: 'cost-meter', surface, ...BAND })
+    const ui = await $.ui.mount({ plugin: 'cost-git', surface, ...BAND })
     const row = await rowText(ui)
     expect(row).toContain('Session $0.00 · Last message $0.00')
     expect(row).not.toMatch(/🛴|🚕|ᴥ|▲|\/hr|latte/)
@@ -36,19 +36,19 @@ test('after turns the session total counts up and last message is the latest tur
   await clock.advance(1200)
 
   for (const surface of SURFACES) {
-    const ui = await $.ui.mount({ plugin: 'cost-meter', surface, ...BAND })
+    const ui = await $.ui.mount({ plugin: 'cost-git', surface, ...BAND })
     expect(await rowText(ui)).toContain('Session $22.50 · Last message $22.50')
     await ui.unmount()
   }
 
   await measure($, 22.6)
   await clock.advance(400)
-  const mid = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  const mid = await $.ui.mount({ plugin: 'cost-git', surface: 'terminal', ...BAND })
   expect(await rowText(mid)).toContain('Last message $0.10')
   await mid.unmount()
 
   await clock.advance(1200)
-  const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'cost-git', surface: 'terminal', ...BAND })
   expect(await rowText(ui)).toContain('Session $22.60 · Last message $0.10')
   await ui.unmount()
 })
@@ -88,7 +88,7 @@ test('the right side shows repo, branch, changes, ahead/behind and CI', async ($
   await endTurn($)
 
   for (const surface of SURFACES) {
-    const ui = await $.ui.mount({ plugin: 'cost-meter', surface, ...BAND })
+    const ui = await $.ui.mount({ plugin: 'cost-git', surface, ...BAND })
     expect(await ui.find({ type: 'Text', text: /ai-playground/ })).toBeDefined()
     expect(await ui.find({ key: 'git-branch' })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /●2/ })).toBeDefined()
@@ -107,7 +107,7 @@ test('push takes two presses; pull takes one', async ($, on) => {
   fakeRepo(on, ran, { isClean: true })
   await endTurn($)
 
-  const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'cost-git', surface: 'terminal', ...BAND })
   expect(await ui.find({ key: 'git-push', text: /^Push 2$/ } as never)).toBeDefined()
   await ui.press({ key: 'git-push' })
   expect(ran).not.toContain('git push')
@@ -134,7 +134,7 @@ test('with nothing to push but uncommitted files, push commits them first', asyn
   on('model.complete', () => ({ value: { isAnswered: true, text: 'Add b.txt and tweak a.txt\n', usage: {} } }))
   await endTurn($)
 
-  const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'cost-git', surface: 'terminal', ...BAND })
   expect(await ui.find({ key: 'git-push', text: /Commit & push/ } as never)).toBeDefined()
   await ui.press({ key: 'git-push' })
   expect(await ui.find({ key: 'git-push', text: /Commit 2 files & push\? ✓/ } as never)).toBeDefined()
@@ -157,7 +157,7 @@ test('with commits ahead and uncommitted files, push commits them too', async ($
   on('model.complete', () => ({ value: { isAnswered: true, text: 'Tweak a.txt', usage: {} } }))
   await endTurn($)
 
-  const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'cost-git', surface: 'terminal', ...BAND })
   expect(await ui.find({ key: 'git-push', text: /Commit & push 3/ } as never)).toBeDefined()
   await ui.press({ key: 'git-push' })
   expect(await ui.find({ key: 'git-push', text: /Commit 2 files & push 3 commits\? ✓/ } as never)).toBeDefined()
@@ -176,7 +176,7 @@ test('a failed commit does not push', async ($, on) => {
   on('model.complete', () => ({ value: { isAnswered: false, reason: 'empty-reply', usage: {} } }))
   await endTurn($)
 
-  const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'cost-git', surface: 'terminal', ...BAND })
   await ui.press({ key: 'git-push' })
   await ui.press({ key: 'git-push' })
   // With no model reply, the message falls back to a plain one.
@@ -190,7 +190,7 @@ test('outside a git repo the right side hides', async ($, on) => {
   mock.clock(on, { now: 60_000 })
   fakeRepo(on, [], { isRepo: false })
   await endTurn($)
-  const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  const ui = await $.ui.mount({ plugin: 'cost-git', surface: 'terminal', ...BAND })
   expect(await ui.find({ key: 'git-push' })).toBeUndefined()
   expect(await ui.find({ type: 'Text', text: /\$0\.00/ })).toBeDefined()
   await ui.unmount()
@@ -203,7 +203,7 @@ test('picking a branch in the picker switches to it', async ($, on) => {
   await endTurn($)
 
   for (const surface of SURFACES) {
-    const ui = await $.ui.mount({ plugin: 'cost-meter', surface, ...BAND })
+    const ui = await $.ui.mount({ plugin: 'cost-git', surface, ...BAND })
     await ui.select({ key: 'git-branch', value: 'feature/cats' })
     expect(ran).toContain('git switch feature/cats')
     expect(await ui.find({ type: 'Text', text: /on feature\/cats ✓/ })).toBeDefined()
@@ -214,8 +214,8 @@ test('picking a branch in the picker switches to it', async ($, on) => {
 test('there is no hover detail line', async ($, on) => {
   mock.clock(on, { now: 60_000 })
   for (const surface of SURFACES) {
-    const ui = await $.ui.mount({ plugin: 'cost-meter', surface, ...BAND })
-    expect(await ui.find({ key: 'cost-meter-detail' } as never)).toBeUndefined()
+    const ui = await $.ui.mount({ plugin: 'cost-git', surface, ...BAND })
+    expect(await ui.find({ key: 'cost-git-detail' } as never)).toBeUndefined()
     expect(await rowText(ui)).not.toMatch(/\$\d+\.\d{4}|started/)
     await ui.unmount()
   }

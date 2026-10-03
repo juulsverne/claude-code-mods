@@ -38,6 +38,6 @@ export type Git = {
 declare module 'claude-code' {
   interface PluginState {
     // `git` is null outside a git repository.
-    'cost-meter': { meter: Meter; motion: Motion; isHidden: boolean; git: Git | null }
+    'cost-git': { meter: Meter; motion: Motion; isHidden: boolean; git: Git | null }
   }
 }

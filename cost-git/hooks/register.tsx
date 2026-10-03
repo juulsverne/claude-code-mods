@@ -19,14 +19,14 @@ const NOTE_MS = 8000
 
 // ── State ───────────────────────────────────────────────────────────────────
 
-const meter = atom({ plugin: 'cost-meter', key: 'meter' } as const, {
+const meter = atom({ plugin: 'cost-git', key: 'meter' } as const, {
   total: 0,
   lastTurn: 0,
   startedAt: 0,
 })
-const motion = atom({ plugin: 'cost-meter', key: 'motion' } as const, { shown: 0 })
-const isHidden = atom({ plugin: 'cost-meter', key: 'isHidden' } as const, false)
-const git = atom({ plugin: 'cost-meter', key: 'git' } as const, null)
+const motion = atom({ plugin: 'cost-git', key: 'motion' } as const, { shown: 0 })
+const isHidden = atom({ plugin: 'cost-git', key: 'isHidden' } as const, false)
+const git = atom({ plugin: 'cost-git', key: 'git' } as const, null)
 
 const money = (usd: number) => `$${usd.toFixed(2)}`
 
@@ -218,7 +218,7 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'meter',
-      description: 'Show or hide the cost meter band',
+      description: 'Show or hide the cost-git band',
     })
 
     // A reload keeps $.state, so only seed what the host can tell us now.
@@ -254,7 +254,7 @@ export const register: Register = on => {
   on('command.run', { command: 'meter' }, async $ => {
     const hidden = await update($, isHidden, was => !was)
 
-    return { text: hidden ? 'Cost meter hidden. /meter brings it back.' : 'Cost meter on.' }
+    return { text: hidden ? 'cost-git band hidden. /meter brings it back.' : 'cost-git band on.' }
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
@@ -327,7 +327,7 @@ export const register: Register = on => {
     )
 
     return (
-      <Box key="cost-meter" flexDirection="column">
+      <Box key="cost-git" flexDirection="column">
         <Box flexDirection="row" justifyContent="space-between" flexWrap="wrap" columnGap={3}>
           <Box flexDirection="row" gap={1}>
             <Text dimColor>Session</Text>

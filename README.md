@@ -17,12 +17,12 @@ claude-code-mods/
 
 | Mod | What it does |
 | --- | --- |
-| [cost-meter](cost-meter/README.md) | Band above the prompt: session cost, plus git, CI, pull and push |
+| [cost-git](cost-git/README.md) | Band above the prompt: session cost, plus git, CI, pull and push |
 
 ## Try one locally
 
 ```bash
-claude --plugin-dir cost-meter
+claude --plugin-dir cost-git
 ```
 
 ## Install
@@ -31,7 +31,7 @@ In Claude Code:
 
 ```
 /plugin marketplace add juulsverne/claude-code-mods
-/plugin install cost-meter@playground-mods
+/plugin install cost-git@playground-mods
 ```
 
 `/plugin marketplace update playground-mods` picks up new versions.
