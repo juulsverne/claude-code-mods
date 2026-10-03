@@ -121,8 +121,8 @@ async function pull($: EngineInterface) {
   await refreshGit($)
 }
 
-// Nothing to push but uncommitted files: Push commits them first.
-const commitsFirst = (g: Git) => g.ahead === 0 && g.dirty > 0
+// Uncommitted files: Push commits them first, so nothing is left behind.
+const commitsFirst = (g: Git) => g.dirty > 0
 
 // A one-line commit message from the staged diff, or a plain fallback.
 async function commitMessage($: EngineInterface, files: number) {
@@ -309,8 +309,10 @@ export const register: Register = on => {
                 ? 'Pushing…'
                 : commitsFirst(g)
                   ? g.isPushArmed
-                    ? `Commit ${g.dirty} file${g.dirty === 1 ? '' : 's'} & push? ✓`
-                    : 'Commit & push'
+                    ? `Commit ${g.dirty} file${g.dirty === 1 ? '' : 's'} & push${g.ahead > 0 ? ` ${g.ahead + 1} commits` : ''}? ✓`
+                    : g.ahead > 0
+                      ? `Commit & push ${g.ahead + 1}`
+                      : 'Commit & push'
                   : g.isPushArmed
                     ? `Push ${g.ahead} commit${g.ahead === 1 ? '' : 's'}? ✓`
                     : g.ahead > 0

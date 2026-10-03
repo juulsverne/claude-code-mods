@@ -54,7 +54,11 @@ test('after turns the session total counts up and last message is the latest tur
 })
 
 // A fake repo beneath the plugin: answers git and gh by argv, records what ran.
-function fakeRepo(on: any, ran: string[], opts: { ahead?: number; isRepo?: boolean; commitFails?: boolean } = {}) {
+function fakeRepo(
+  on: any,
+  ran: string[],
+  opts: { ahead?: number; isRepo?: boolean; isClean?: boolean; commitFails?: boolean } = {},
+) {
   on('process.run', (_$: any, e: any) => {
     const cmd = e.argv.join(' ')
     ran.push(cmd)
@@ -62,7 +66,7 @@ function fakeRepo(on: any, ran: string[], opts: { ahead?: number; isRepo?: boole
     if (opts.isRepo === false) return { value: { exitCode: 128, stdout: '', stderr: 'not a git repository', isStdoutTruncated: false } }
     if (cmd === 'git rev-parse --show-toplevel') return ok('D:/ai-playground\n')
     if (cmd === 'git branch --show-current') return ok('main\n')
-    if (cmd === 'git status --porcelain') return ok(' M a.txt\n?? b.txt\n')
+    if (cmd === 'git status --porcelain') return ok(opts.isClean ? '' : ' M a.txt\n?? b.txt\n')
     if (cmd.startsWith('git rev-list')) return ok(`1\t${opts.ahead ?? 2}\n`)
     if (cmd.startsWith('git for-each-ref')) return ok('main\nfeature/cats\n')
     if (opts.commitFails && cmd.startsWith('git commit')) {
@@ -100,10 +104,11 @@ test('the right side shows repo, branch, changes, ahead/behind and CI', async ($
 test('push takes two presses; pull takes one', async ($, on) => {
   const clock = mock.clock(on, { now: 60_000 })
   const ran: string[] = []
-  fakeRepo(on, ran)
+  fakeRepo(on, ran, { isClean: true })
   await endTurn($)
 
   const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  expect(await ui.find({ key: 'git-push', text: /^Push 2$/ } as never)).toBeDefined()
   await ui.press({ key: 'git-push' })
   expect(ran).not.toContain('git push')
   expect(await ui.find({ key: 'git-push', text: /Push 2 commits\? ✓/ } as never)).toBeDefined()
@@ -114,6 +119,7 @@ test('push takes two presses; pull takes one', async ($, on) => {
   expect(ran).not.toContain('git push')
   await ui.press({ key: 'git-push' })
   expect(ran).toContain('git push')
+  expect(ran).not.toContain('git add -A')
   expect(await ui.find({ type: 'Text', text: /pushed ✓/ })).toBeDefined()
 
   await ui.press({ key: 'git-pull' })
@@ -141,6 +147,25 @@ test('with nothing to push but uncommitted files, push commits them first', asyn
   expect(add).toBeGreaterThan(-1)
   expect(commit).toBeGreaterThan(add)
   expect(push).toBeGreaterThan(commit)
+  await ui.unmount()
+})
+
+test('with commits ahead and uncommitted files, push commits them too', async ($, on) => {
+  mock.clock(on, { now: 60_000 })
+  const ran: string[] = []
+  fakeRepo(on, ran, { ahead: 2 })
+  on('model.complete', () => ({ value: { isAnswered: true, text: 'Tweak a.txt', usage: {} } }))
+  await endTurn($)
+
+  const ui = await $.ui.mount({ plugin: 'cost-meter', surface: 'terminal', ...BAND })
+  expect(await ui.find({ key: 'git-push', text: /Commit & push 3/ } as never)).toBeDefined()
+  await ui.press({ key: 'git-push' })
+  expect(await ui.find({ key: 'git-push', text: /Commit 2 files & push 3 commits\? ✓/ } as never)).toBeDefined()
+  await ui.press({ key: 'git-push' })
+  const commit = ran.indexOf('git commit -m Tweak a.txt')
+  expect(ran.indexOf('git add -A')).toBeGreaterThan(-1)
+  expect(commit).toBeGreaterThan(ran.indexOf('git add -A'))
+  expect(ran.indexOf('git push')).toBeGreaterThan(commit)
   await ui.unmount()
 })
 

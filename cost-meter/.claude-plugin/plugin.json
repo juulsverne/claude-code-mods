@@ -1,7 +1,7 @@
 {
   "name": "cost-meter",
-  "version": "0.2.0",
-  "description": "A band above the prompt: session and last-message cost, plus git branch, status, CI, pull and push (commits first when there's nothing to push)",
+  "version": "0.3.0",
+  "description": "A band above the prompt: session and last-message cost, plus git branch, status, CI, pull and push (push commits any uncommitted changes first, with a generated message)",
   "author": { "name": "juulsverne", "url": "https://github.com/juulsverne" },
   "types": "./types/index.d.ts"
 }

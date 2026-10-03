@@ -19,7 +19,7 @@ A Claude Code mod: a band above the prompt. The left side shows what the session
 - **CI**: the newest GitHub Actions run on the branch, ✅ ❌ 🟡, via `gh`. It's hidden when there's none.
 - **Pull**: runs `git pull --ff-only`.
 - **Push**: takes two clicks within 5 s. It runs `git push`, with `-u origin <branch>` when there's no upstream.
-- **Commit & push**: when nothing is committed ahead of the upstream but there are uncommitted files, the button reads `Commit & push`. The second click stages everything (`git add -A`), commits with a one-line message Haiku writes from the diff (falling back to `Update N files`), then pushes. If the commit fails (a pre-commit hook, say), it shows git's error and doesn't push.
+- **Commit & push**: whenever there are uncommitted files, Push commits them before it pushes, so nothing is left behind. The button reads `Commit & push` (or `Commit & push 3` when commits are already waiting). The second click stages everything (`git add -A`), commits with a one-line message Haiku writes from the diff (falling back to `Update N files`), then pushes. If the commit fails (a pre-commit hook, say), it shows git's error and doesn't push.
 - **Results**: the outcome of a pull, push or switch shows inline for 8 s.
 - **Refreshing**: on session start, after every turn and after each action, plus a quiet `git fetch` every 5 minutes. Outside a git repo the whole right side hides.
 
@@ -48,12 +48,12 @@ claude --plugin-dir cost-meter
 
 - `claude plugin validate claude-code-mods/cost-meter`: passes with no warnings.
 - `tsc` against Claude Code 2.1.286's plugin types: the hooks module is clean; the test file has fixture typing errors (the `BAND` props), which don't affect running the tests.
-- `claude plugin test claude-code-mods/cost-meter`: 9 tests pass on the terminal and desktop surfaces. They cover:
+- `claude plugin test claude-code-mods/cost-meter`: 10 tests pass on the terminal and desktop surfaces. They cover:
   - a fresh session reading `Session $0.00 · Last message $0.00` with no emoji
   - the session figure counting up after turns, and last message tracking the latest turn
   - the git side's repo, branch picker, changes, ahead/behind and CI
   - Push needing two clicks (and disarming after 5 s), and Pull
-  - Commit & push staging, committing and pushing in order, and a failed commit not pushing
+  - Commit & push staging, committing and pushing in order, with or without commits already ahead, and a failed commit not pushing
   - picking a branch running `git switch`
   - the git side hiding outside a repo
   - no hover detail line
