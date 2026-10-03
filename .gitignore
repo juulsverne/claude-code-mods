@@ -1,0 +1,4 @@
+# Engine-written API types (regenerate with /plugin-types)
+*/.claude-plugin/types/
+.claude/
+node_modules/
